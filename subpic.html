@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+<div id="div">
+
+</div>
+
+
+<script>
+let tag={}
+let key= window.location.search.substring(1).replace('-','00').replace(/-uncensored-leak/g,'').toLocaleLowerCase()
+console.log('key:',key)
+
+
+let div=document.getElementById('div')
+for(var i=0;i<30;i++){
+        tag[i]=0
+        let img=document.createElement('img')
+            img.src='https://pics.dmm.co.jp/digital/video/'+key+'/'+key+'jp-'+i+'.jpg'
+            img.name=i
+            img.addEventListener("load", function(event) {
+                let imgWidth=event.target.naturalWidth
+                if(imgWidth==90){
+                    reload(event.target)}
+                    });
+            div.appendChild(img)
+       }
+
+
+function reload(ele){
+    tag[ele.name]++;
+    let url='https://pics.dmm.co.jp/digital/video/'+key+'/'+key+'jp-'+ele.name+'.jpg'
+    if(tag[ele.name]==1){//rebdb
+        ele.src=url.replace(new RegExp(key, 'g'),'h_346'+key)
+    }else if(tag[ele.name]==2){
+        ele.src=url.replace(new RegExp('rebd00675', 'g'),'h_346rebd00689')
+    }else if(tag[ele.name]==3){
+        ele.src=url.replace(new RegExp(key, 'g'),'406'+key)
+    }else if(tag[ele.name]==4){
+        ele.src=url.replace(new RegExp(key, 'g'),'1'+key)
+    }else {
+        ele.style.display='none'
+    }
+}
+</script>
+</body>

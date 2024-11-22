@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+    <div><video id="video" controls></video></div>
+    <div><button onclick="change()" style="width:30vw;height: 20vh;font-size:30px">change</button></div>
+    <!-- <video id="video2" controls></video> -->
+<script>
+        let tag={0:0}
+        let key= window.location.search.substring(1).replace('-','00').replace(/-uncensored-leak/g,'').toLocaleLowerCase()
+        let newkey=key
+        let video=document.getElementById('video')
+        console.log('key:',key)
+        let img=document.createElement('img')
+                    img.src='https://pics.dmm.co.jp/digital/video/'+key+'/'+key+'jp-1'+'.jpg'
+                    img.name=0
+                    img.addEventListener("load", function(event) {
+                        let imgWidth=event.target.naturalWidth
+                        if(imgWidth==90){
+                            reload(event.target)
+                        }else{
+                            tag[0]=0
+                            console.log(newkey)
+                           video.src='https://cc3001.dmm.co.jp/litevideo/freepv/'+newkey[0]+'/'+newkey.match(/.{3}/)[0]+'/'+newkey+'/'+newkey+'_mhb_w.mp4'
+                          
+                           console.log(video.src)
+
+                        }
+                    });
+
+         function change(){
+            reloadvideo(video)
+            //event.target.innerHTML=tag[0]
+         }
+
+         function reload(ele){
+            tag[0]++;
+            let url='https://pics.dmm.co.jp/digital/video/'+key+'/'+key+'jp-1'+'.jpg'
+            if(tag[0]==1){//rebdb
+                ele.src=url.replace(new RegExp(key, 'g'),'h_346'+key)
+            }else if(tag[0]==2){
+                ele.src=url.replace(new RegExp('rebd00675', 'g'),'h_346rebd00689')
+            }else if(tag[0]==3){
+                ele.src=url.replace(new RegExp(key, 'g'),'406'+key)
+            }else if(tag[0]==4){
+                ele.src=url.replace(new RegExp(key, 'g'),'1'+key)
+            }else {
+                ele.style.display='none'
+            }
+            newkey=ele.src.split('/')[5]
+        }
+
+        function reloadvideo(ele){
+            tag[0]++;
+            if(tag[0]==1){
+                ele.src=ele.src.replace('_mhb_w','hhb')
+               // checkcode(ele)
+            }else if(tag[0]==2){
+                ele.src=ele.src.replace('hhb','4ks')
+               // checkcode(ele)
+            }else if(tag[0]==3){
+                ele.src='https://cc3001.dmm.co.jp/litevideo/freepv/'+newkey[0]+'/'+newkey.match(/.{3}/)[0]+'/'+newkey.replace('00','')+'/'+newkey.replace('00','')+'_mhb_w.mp4'        
+            }else{
+                tag[0]=0
+                ele.src='https://cc3001.dmm.co.jp/litevideo/freepv/'+newkey[0]+'/'+newkey.match(/.{3}/)[0]+'/'+newkey+'/'+newkey+'_mhb_w.mp4'
+            }
+
+            document.getElementsByTagName('button')[0].innerHTML=ele.src.split('/')[ele.src.split('/').length-1].replace('.mp4','')
+            console.log(ele.src.split('/')[ele.src.split('/').length-1].replace('.mp4',''))
+        }
+
+        function checkcode(ele){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', ele.src, true);
+            xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                   
+console.log('status:',xhr.status)
+                } else {
+                    
+                    console.log('视频返回状态码: ' + xhr.status);
+                }
+            }
+            };
+            // 设置响应类型为 blob，以便获取二进制数据
+                xhr.responseType = 'blob';
+
+                // 当请求完成时执行的回调函数
+                xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // 获取到的二进制数据存储在 response 属性中
+                    var blobData = xhr.response;
+                    
+                    // 在这里处理 blobData，比如播放视频等
+                    // 创建一个 Blob 对象
+                     var blob = new Blob([blobData], { type: 'video/mp4' });
+
+            //         // 创建一个 URL
+                     var url = URL.createObjectURL(blob);
+                     document.getElementById('video2').src=url
+                     document.getElementById('video2').play()
+                }else{
+
+                }
+};
+            xhr.send();
+
+        }
+</script>
+</body>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <style>
+        #content p{
+            margin:1px
+        }
+        .btn{
+            height: 60px;
+            width: 80px;
+        }
+        .fixedButton {
+            position: fixed;    /* 固定定位 */
+            height: 60px;
+            width: 80px;
+            top: 20px;           /* 距离页面顶部 20px */
+            left: 20px;          /* 距离页面左边 20px */
+            padding: 10px 20px;  /* 按钮内边距 */
+            opacity: 0.5;
+            color: white;        /* 字体颜色为白色 */
+            border: none;        /* 无边框 */
+            border-radius: 5px;  /* 圆角按钮 */
+            font-size: 16px;      /* 字体大小 */
+            cursor: pointer;     /* 鼠标悬停时显示为指针 */
+            transition: background-color 0.3s; /* 背景色平滑过渡 */
+            z-index: 1000;        /* 确保按钮位于页面上层 */
+        }
+    </style>
+<textarea id="input" style="width:77vw;height:3vh"></textarea><br>
+<button id="sendButton">Send</button>
+<button class="fixedButton" onclick="startScrolling()" >s</button>
+<button class="btn" onclick="fontsize(0)">-</button><button class="btn" onclick="fontsize(1)">+</button>
+<div id="content" style="font-size: 20px; white-space:normal;word-break: break-word;">
+
+</div>
+<script>
+    let ip='47.100.229.25'
+    let iv="96ec2a96f13319df65c0a4419e46b506"
+    let mykey='your-32-byte-key-string-12345678'
+
+// 示例：通过 fetch API 发送 POST 请求
+fetch('http://'+ip+'/english/njtxt', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tag: 'r' }), 
+    })
+    .then(response => response.json())
+    .then(data => {console.log(data)
+        iv=CryptoJS.enc.Utf8.parse(iv)
+        mykey=CryptoJS.enc.Utf8.parse(mykey)
+        data=aesDecrypt(data.encryptedData,data.secret.data,data.iv)
+        JSON.parse(JSON.parse(data)).forEach(element => {
+            const newItem = document.createElement('p');
+            newItem.addEventListener('click', function() {
+                if (confirm('del'+newItem.innerHTML)) {
+                    fetch('http://'+ip+'/english/njtxt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ tag: 'del',index_:newItem.index}), 
+                    })
+                    .then(data=>{
+                        if(data='ok'){
+                        newItem.remove();
+                    }})
+                    
+                }
+            });
+            // 设置新 div 的内容
+            newItem.textContent = element.sentence;
+            newItem.index=element.index_
+            
+            // 将新 div 插入到 content div 中
+            document.getElementById('content').appendChild(newItem);
+        });
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+
+
+
+document.getElementById('sendButton').addEventListener('click', function() {
+    // 获取 textarea 中的文本
+    const text = document.getElementById('input').value;
+
+    // 显示获取的文本 (可以替换为发送请求的代码)
+   // console.log('Sending text:', CryptoJS.AES.encrypt(text, mykey, { iv: iv }).toString());
+   // console.log(mykey)
+    //console.log('ttt:',aesDecrypt(CryptoJS.AES.encrypt(text, JSON.parse(mykey), { iv: iv }).toString(),mykey,iv))
+
+    // 示例：通过 fetch API 发送 POST 请求
+    fetch('http://'+ip+'/english/njtxt', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tag: 'w',sentence:customBase64Encode(text) }), 
+    })
+    .then(response => response.json())
+    .then(data => {
+        window.location.reload()
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+});
+
+//var secretKey='d9b072a78225a5e0e530be4c318c039123ce09644e6f1d9fe39a3b527da5fcce'
+//加密
+function aesEncrypt(text) {
+    return CryptoJS.AES.encrypt(text, secretKey).toString();
+}
+// AES 解密函数
+function aesDecrypt(ciphertextHex, keyArray, ivHex) {
+        // 将密钥从数组格式转换为十六进制字符串
+        const keyHex = keyArray.map(byte => ('0' + byte.toString(16)).slice(-2)).join('');
+        const key = CryptoJS.enc.Hex.parse(keyHex);
+        const iv = CryptoJS.enc.Hex.parse(ivHex);
+
+        // 将密文解析为 WordArray
+        const ciphertextWordArray = CryptoJS.enc.Hex.parse(ciphertextHex);
+
+        // 创建 CipherParams 对象
+        const cipherParams = CryptoJS.lib.CipherParams.create({
+            ciphertext: ciphertextWordArray,
+            formatter: CryptoJS.format.Hex
+        });
+
+        // 解密操作
+        const decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+
+        // 返回解密后的 UTF-8 字符串
+        return decrypted.toString(CryptoJS.enc.Utf8);
+    }
+
+// 自定义 Base64 字母表
+const customAlphabet = 'ZYXWVUTSRQPONMLKJIHGFEDCBAabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+function customBase64Encode(str) {
+   // 使用标准 Base64 编码 (btoa)
+   const base64 = btoa(unescape(encodeURIComponent(str))); // 处理 UTF-8 字符串
+
+// 将标准 Base64 编码中的字符替换为自定义字符集
+let result = '';
+for (let i = 0; i < base64.length; i++) {
+    const char = base64[i];
+    const index = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.indexOf(char);
+    result += index !== -1 ? customAlphabet[index] : char; // 替换
+}
+
+return result;
+}
+
+
+//放大缩小字体
+function fontsize(a){
+        const dis=2
+    var divElement = document.getElementById("content");
+        // 获取当前字体大小并转换为数字
+        // 获取当前字体大小并转换为数字（去掉 px）
+        var currentSize = parseInt(window.getComputedStyle(divElement).fontSize);
+
+        // 增加 0.2vh
+        var newVhSize
+        a?newVhSize = currentSize + dis:newVhSize = currentSize - dis;
+        // 设置新的字体大小为 vh 单位
+        divElement.style.fontSize = newVhSize + "px";
+}
+
+//滚动
+let scrollSpeed = 0.4; // 每次滚动的像素
+    let scrollPosition = 0; // 当前滚动位置
+    let scrollInterval;
+    let pageHeight=99999999999
+    let dis=20
+    let tag=0
+
+    function scrollToBottom() {
+       
+       //console.log('scrollHeight:'+document.body.scrollHeight+','+window.innerHeight)
+
+        // 滚动到底部
+        if (scrollPosition < pageHeight) {
+            scrollPosition += scrollSpeed;
+            window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'  // 设置平滑滚动
+        }, scrollPosition);
+        } else {
+            // 到达底部后，暂停 5 秒
+            clearInterval(scrollInterval); // 清除当前的滚动
+            setTimeout(() => {
+                // 5 秒后重新开始从顶部滚动
+                scrollPosition = 0;
+                window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'  // 设置平滑滚动
+        }, scrollPosition);
+                scrollInterval = setInterval(scrollToBottom, dis); // 重新开始滚动
+            }, 10000); // 暂停 5 秒
+        }
+         pageHeight = document.body.scrollHeight - window.innerHeight; // 页面总高度
+    }
+
+    function startScrolling() {
+        if(tag){
+            clearInterval(scrollInterval);
+            tag=!tag
+        }else{
+            tag=!tag
+            scrollPosition = window.scrollY; // 从顶部开始   
+            scrollInterval = setInterval(scrollToBottom, dis); // 每 20 毫秒滚动一次
+        }
+    }
+    
+</script>    
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://47.100.229.25/nj/v.json"></script>
+    <title>Responsive Image Gallery</title>
+    <style>
+        /* 基本样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 20px;
+            padding: 0 20px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-gap: 20px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* 响应式样式 */
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-gap: 10px;
+            }
+        }
+    </style>
+</head>
+<!--图床： https://eightcha.com/noskn-083/cover.jpg?class=normal&quot
+
+-->
+<body>
+    <div class="container">
+             <div>
+                <input type="text" id="myInput"><button onclick="save()">submit</button><button onclick="display()" id="cc"></button>
+             </div><br>
+        <div id="imageContainer" class="gallery">
+            <!-- 图片列表 -->
+            
+            <!-- 在这里添加更多图片 -->
+        </div>
+    </div>
+    <script>
+         window.addEventListener('load', function() {
+              // 获取图片容器
+            var container = document.getElementById('imageContainer');
+            
+
+            // 循环遍历图片数组
+            videoArr.forEach(function(imageSrc,index) {
+                let key=imageSrc.split('/')[imageSrc.split('/').length-1].replace('-','00')
+                // 创建<a>标签
+                    var link = document.createElement('span');
+                    // 设置 target 属性为 _blank，在新窗口打开链接
+                   // link.target = '_blank';
+                // 设置链接的 href 属性为图片路径
+                   // link.href = imageSrc;
+                    link.style.position='relative'
+                //
+                    let p=document.createElement('p')
+                    p.innerHTML=decodeURIComponent(key)
+                    p.setAttribute("data-url",imageSrc)
+                    p.style.position='absolute'
+                    p.style.display='none'
+                    p.addEventListener("click", function() {
+                        window.confirm('是否删除？')?del(p.getAttribute('data-url')):0
+                    });
+                    link.appendChild(p)
+                //摘要视频
+                let a=document.createElement('a')
+                    a.innerHTML='shortVideo'                   
+                    a.href='http://47.100.229.25/nj/shortvideo.html?' + encodeURIComponent(imageSrc.split('/')[imageSrc.split('/').length-1])
+                    a.setAttribute('target', '_blank')
+                    a.style.position='absolute'
+                    a.style.left='1px'
+                    a.style.bottom='1px'
+                    a.style.opacity=0
+                    link.appendChild(a)
+
+                    let subpic=document.createElement('span')
+                    subpic.innerHTML='subpic'
+                    subpic.setAttribute("data-url",imageSrc)
+                    subpic.style.position='absolute'
+                    subpic.style.right='1px'
+                    subpic.style.bottom='1px'
+                    subpic.style.opacity=0
+                    subpic.addEventListener("click", function() {
+                        openImage(event)
+                    });
+                    link.appendChild(subpic)
+                // 创建图片元素
+                var img = document.createElement('img');
+                // 将图片元素添加到<a>标签中
+                 link.appendChild(img);
+                 img.setAttribute("data-url", imageSrc);
+                 img.addEventListener("click", function(event) {                      
+                       window.open(event.target.getAttribute('data-url'), "_blank");
+                    });
+                // 设置图片的 src 属性
+                img.src = 'https://fivetiu.com/'+imageSrc.split('/')[imageSrc.split('/').length-1].toLowerCase()+'/cover-t.jpg?class=normal&quot';
+                // 将图片元素添加到容器中
+                container.appendChild(link);
+           
+            });
+        
+            $('#cc').html(videoArr.length)
+        });
+
+
+        function save(){
+            let src=document.getElementById("myInput").value
+            if(!src){alert('no data');return}
+            if(!src.match(/http/)){
+                src='https://njav.tv/en/v/'+src
+            }
+            let data={url:src,tag:'w'}
+            console.log(data)
+            $.post('http://47.100.229.25/out/njsave', data, function(response) {
+            // 处理成功响应
+            console.log(response.res)
+            window.location.reload(true)
+            }, 'json')
+        .fail(function(xhr, status, error) {
+            // 处理错误情况
+            console.log(xhr)
+            console.log(status)
+            console.log(error)
+        });
+        }
+    
+    function del(url){
+            $.post('http://47.100.229.25/out/njsave',{url:url,tag:'del'},function(response){
+                window.location.reload(true)
+            }).fail(function(xhr, status, error) {
+            // 处理错误情况
+            console.log(xhr)
+            console.log(status)
+            console.log(error)
+        });
+    }
+
+    function display(){
+        $('p').css('display')!='none'?$('p').css('display','none'):$('p').css('display','block')
+    }
+
+    function openImage(event) {
+        // 图片地址
+        var imageSrc = event.target.getAttribute('data-url').toLowerCase();
+        
+        // 打开新窗口，并设置大小
+        var newWindow = window.open('http://47.100.229.25/nj/subpic1.html?' + encodeURIComponent(imageSrc.split('/')[imageSrc.split('/').length-1]));
+
+     }
+    </script>
+</body>
+</html>
